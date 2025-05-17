@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Torneo de Tenis por Equipos</title>
+    <style>
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+        background-color: #f8fafc;
+        color: #1e293b;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 30px;
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        border-radius: 16px;
+      }
+      h1 {
+        text-align: center;
+        color: #0f172a;
+        margin-bottom: 40px;
+        font-size: 2.5em;
+        font-weight: 800;
+      }
+      h2 {
+        color: #1e293b;
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-top: 40px;
+        font-size: 1.8em;
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+      }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        padding: 10px 0;
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 20px;
+      }
+      .section-header h2 {
+        margin: 0;
+        padding: 0;
+        line-height: 1;
+      }
+      .collapse-button {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        color: #64748b;
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.2em;
+        padding: 0;
+        margin: 0;
+        line-height: 1;
+        position: relative;
+        top: -2px;
+      }
+      .collapse-button span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        transform: rotate(90deg);
+      }
+      .collapse-button:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        color: #475569;
+        transform: scale(1.05);
+      }
+      .collapse-button.collapsed {
+        transform: rotate(-180deg);
+      }
+      .section-content {
+        transition: all 0.3s ease-out;
+        overflow: hidden;
+      }
+      .section-content.collapsed {
+        max-height: 0;
+        margin: 0;
+        padding: 0;
+        opacity: 0;
+      }
+      .teams {
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+      .team {
+        flex: 1;
+        padding: 25px;
+        border-radius: 12px;
+        transition: transform 0.2s ease;
+      }
+      .team:hover {
+        transform: translateY(-2px);
+      }
+      .team-red {
+        background-color: #fef2f2;
+        border: 2px solid #ef4444;
+      }
+      .team-black {
+        background-color: #f1f5f9;
+        border: 2px solid #334155;
+      }
+      .team h3 {
+        text-align: center;
+        margin-top: 0;
+        font-size: 1.5em;
+        font-weight: 700;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid;
+      }
+      .team-red h3 {
+        color: #dc2626;
+        border-color: #fecaca;
+      }
+      .team-black h3 {
+        color: #1e293b;
+        border-color: #e2e8f0;
+      }
+      .player-list {
+        list-style-type: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+      }
+      .player-list li {
+        padding: 12px;
+        margin-bottom: 0;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        font-size: 0.95em;
+      }
+      .team-red .player-list li {
+        background-color: #fee2e2;
+      }
+      .team-black .player-list li {
+        background-color: #e2e8f0;
+      }
+      .player-list li:hover {
+        transform: translateX(4px);
+      }
+      .matches {
+        margin-top: 40px;
+      }
+      .schedule-container {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+      }
+      .time-block {
+        background-color: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.05),
+          0 2px 4px -2px rgb(0 0 0 / 0.05);
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
+      }
+      .time-block:hover {
+        box-shadow:
+          0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
+      }
+      .time-header {
+        font-weight: 700;
+        font-size: 1.2em;
+        color: #0f172a;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e2e8f0;
+      }
+      .courts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+      .court-block {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.2s ease;
+      }
+      .court-block:hover {
+        background-color: #f1f5f9;
+      }
+      .court-title {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 12px;
+        padding: 8px;
+        background-color: white;
+        border-radius: 8px;
+        font-size: 1.1em;
+      }
+      .match {
+        background-color: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+        transition: all 0.2s ease;
+      }
+      .match:hover {
+        transform: translateY(-2px);
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+      }
+      .match-header {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #475569;
+        font-size: 0.95em;
+      }
+      .red-player {
+        color: #dc2626;
+        font-weight: 500;
+      }
+      .black-player {
+        color: #1e293b;
+        font-weight: 500;
+      }
+      footer {
+        margin-top: 60px;
+        text-align: center;
+        color: #64748b;
+        font-size: 0.95em;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+      }
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
+          border-radius: 12px;
+        }
+        .teams {
+          flex-direction: column;
+          gap: 20px;
+        }
+        .team {
+          padding: 20px;
+        }
+        .player-list {
+          grid-template-columns: 1fr;
+        }
+        .player-list li {
+          padding: 10px;
+        }
+        h1 {
+          font-size: 2em;
+        }
+        h2 {
+          font-size: 1.5em;
+        }
+      }
+      @media (max-width: 480px) {
+        .container {
+          padding: 15px;
+        }
+        .team {
+          padding: 15px;
+        }
+        .team h3 {
+          font-size: 1.3em;
+          padding-bottom: 10px;
+          margin-bottom: 15px;
+        }
+        .player-list li {
+          font-size: 0.9em;
+          padding: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Torneo de Tenis por Equipos</h1>
+
+      <div class="section-header" onclick="toggleSection('teams')">
+        <h2>Asignación de Equipos</h2>
+        <button
+          class="collapse-button"
+          id="teamsButton"
+          aria-label="Toggle section"
+        >
+          <span>›</span>
+        </button>
+      </div>
+      <div class="section-content" id="teamsContent">
+        <div class="teams">
+          <div class="team team-red">
+            <h3>Equipo Rojo</h3>
+            <ul class="player-list">
+              <li>1. Fabián 💵</li>
+              <li>3. Eduardo Guesalaga</li>
+              <li>5. Andy Gonzalez 💵</li>
+              <li>7. Felipe Ganem 💵</li>
+              <li>9. Omar Corona 💵</li>
+              <li>11. Juan Castillo 💵</li>
+              <li>13. Angelo Montecinos 💵</li>
+              <li>15. Osvaldo Alvarez 💵</li>
+              <li>17. Cesar Carreño 💵</li>
+              <li>19. Emilio</li>
+              <li>21. Cristian Gonzáles 💵</li>
+              <li>23. Maxi Osorio 💵</li>
+              <li>26. Mario del Valle 💵</li>
+            </ul>
+          </div>
+          <div class="team team-black">
+            <h3>Equipo Negro</h3>
+            <ul class="player-list">
+              <li>2. Marcelo 💵</li>
+              <li>4. Ariel (por confirmar)</li>
+              <li>6. José Urtubia 💵</li>
+              <li>8. Alexander 💵</li>
+              <li>10. Sebastian Munoz 💵</li>
+              <li>12. Camilo Valenzuela 💵</li>
+              <li>14. Héctor Mella 💵</li>
+              <li>16. Sebastian Osorio 💵</li>
+              <li>18. Mauri Silva 💵</li>
+              <li>20. Niko 💵</li>
+              <li>22. Sergio C. 💵</li>
+              <li>24. Sebita Montenegro 💵</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2>Programación de Partidos</h2>
+      <div class="matches">
+        <div class="schedule-container">
+          <div class="time-block">
+            <div class="time-header">10:30 - 11:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #1</div>
+                  <span class="red-player">Fabián</span> vs
+                  <span class="black-player">Marcelo</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #2</div>
+                  <span class="red-player">Eduardo Guesalaga</span> vs
+                  <span class="black-player">José Urtubia</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 3</div>
+                <div class="match">
+                  <div class="match-header">Partido #3</div>
+                  <span class="red-player">Andy Gonzalez</span> vs
+                  <span class="black-player">Sebastian Munoz</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-block">
+            <div class="time-header">11:30 - 12:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #4</div>
+                  <span class="red-player">Felipe Ganem</span> vs
+                  <span class="black-player">Camilo Valenzuela</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #5</div>
+                  <span class="red-player">Omar Corona</span> vs
+                  <span class="black-player">Héctor Mella</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 3</div>
+                <div class="match">
+                  <div class="match-header">Partido #6</div>
+                  <span class="red-player">Juan Castillo</span> vs
+                  <span class="black-player">Sebastian Osorio</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-block">
+            <div class="time-header">12:30 - 13:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #7</div>
+                  <span class="red-player">Angelo Montecinos</span> vs
+                  <span class="black-player">Mauri Silva</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #8</div>
+                  <span class="red-player">Osvaldo Alvarez</span> vs
+                  <span class="black-player">Niko</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 3</div>
+                <div class="match">
+                  <div class="match-header">Partido #9</div>
+                  <span class="red-player">Cesar Carreño</span> vs
+                  <span class="black-player">Sergio C.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-block">
+            <div class="time-header">13:30 - 14:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #10</div>
+                  <span class="red-player">Emilio</span> vs
+                  <span class="black-player">Sebita Montenegro</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #11</div>
+                  <span class="red-player">Cristian Gonzáles</span> vs
+                  <span class="black-player">Alexander</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 3</div>
+                <div class="match">
+                  <div class="match-header">Partido #12</div>
+                  <span class="red-player">Maxi Osorio</span> vs
+                  <span class="black-player">Ariel (por confirmar)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-block">
+            <div class="time-header">14:30 - 15:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #13</div>
+                  <span class="red-player">Mario del Valle</span> vs
+                  <span class="black-player">Marcelo</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #14</div>
+                  <span class="red-player">Fabián</span> vs
+                  <span class="black-player">José Urtubia</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 3</div>
+                <div class="match">
+                  <div class="match-header">Partido #15</div>
+                  <span class="red-player">Eduardo Guesalaga</span> vs
+                  <span class="black-player">Sebastian Munoz</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-block">
+            <div class="time-header">15:30 - 16:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #16</div>
+                  <span class="red-player">Andy Gonzalez</span> vs
+                  <span class="black-player">Camilo Valenzuela</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #17</div>
+                  <span class="red-player">Felipe Ganem</span> vs
+                  <span class="black-player">Héctor Mella</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 3</div>
+                <div class="match">
+                  <div class="match-header">Partido #18</div>
+                  <span class="red-player">Omar Corona</span> vs
+                  <span class="black-player">Sebastian Osorio</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-block">
+            <div class="time-header">16:30 - 17:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #19</div>
+                  <span class="red-player">Juan Castillo</span> vs
+                  <span class="black-player">Mauri Silva</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #20</div>
+                  <span class="red-player">Angelo Montecinos</span> vs
+                  <span class="black-player">Niko</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 3</div>
+                <div class="match">
+                  <div class="match-header">Partido #21</div>
+                  <span class="red-player">Osvaldo Alvarez</span> vs
+                  <span class="black-player">Sergio C.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-block">
+            <div class="time-header">17:30 - 18:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #22</div>
+                  <span class="red-player">Cesar Carreño</span> vs
+                  <span class="black-player">Sebita Montenegro</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #23</div>
+                  <span class="red-player">Emilio</span> vs
+                  <span class="black-player">Alexander</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 3</div>
+                <div class="match">
+                  <div class="match-header">Partido #24</div>
+                  <span class="red-player">Cristian Gonzáles</span> vs
+                  <span class="black-player">Ariel (por confirmar)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-block">
+            <div class="time-header">18:30 - 19:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #25</div>
+                  <span class="red-player">Maxi Osorio</span> vs
+                  <span class="black-player">Marcelo</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #26</div>
+                  <span class="red-player">Mario del Valle</span> vs
+                  <span class="black-player">José Urtubia</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 3</div>
+                <div class="match">
+                  <div class="match-header">Partido #27</div>
+                  <span class="red-player">Fabián</span> vs
+                  <span class="black-player">Sebastian Munoz</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-block">
+            <div class="time-header">19:30 - 20:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #28</div>
+                  <span class="red-player">Eduardo Guesalaga</span> vs
+                  <span class="black-player">Camilo Valenzuela</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #29</div>
+                  <span class="red-player">Andy Gonzalez</span> vs
+                  <span class="black-player">Héctor Mella</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 3</div>
+                <div class="match">
+                  <div class="match-header">Partido #30</div>
+                  <span class="red-player">Felipe Ganem</span> vs
+                  <span class="black-player">Sebastian Osorio</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-block">
+            <div class="time-header">20:30 - 21:30</div>
+            <div class="courts-grid">
+              <div class="court-block">
+                <div class="court-title">Cancha 1</div>
+                <div class="match">
+                  <div class="match-header">Partido #31</div>
+                  <span class="red-player">Omar Corona</span> vs
+                  <span class="black-player">Mauri Silva</span>
+                </div>
+              </div>
+              <div class="court-block">
+                <div class="court-title">Cancha 2</div>
+                <div class="match">
+                  <div class="match-header">Partido #32</div>
+                  <span class="red-player">Juan Castillo</span> vs
+                  <span class="black-player">Niko</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>Torneo de Tenis por Equipos | 16 de Mayo, 2025</p>
+      </footer>
+    </div>
+
+    <script>
+      function toggleSection(sectionId) {
+        const content = document.getElementById(sectionId + 'Content');
+        const button = document.getElementById(sectionId + 'Button');
+
+        content.classList.toggle('collapsed');
+        button.classList.toggle('collapsed');
+      }
+    </script>
+  </body>
+</html>
